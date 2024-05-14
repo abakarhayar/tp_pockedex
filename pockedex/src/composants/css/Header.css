@@ -1,0 +1,27 @@
+.header-container {
+    background-color: #f7f7f7; 
+    padding: 20px; 
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .nav-links {
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #333; 
+    margin-right: 20px; 
+  }
+  
+  .styled-link {
+    font-weight: bold; 
+    color: #007bff; 
+  }
+  

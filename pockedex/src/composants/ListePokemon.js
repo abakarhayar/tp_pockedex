@@ -1,78 +1,104 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Importer le composant de lien depuis React Router
-import Header from './Header'; // Importer le composant Header
-import './ListePokemon.css'; // Importer le fichier CSS pour les styles personnalisés
+import Header from './Header';
+import './css/ListePokemon.css';
 
 const ListePokemon = () => {
-  const [pokemons, setPokemons] = useState([]);
+  const [originalPokemons, setOriginalPokemons] = useState([]); // State to store the original list of Pokémons
+  const [pokemons, setPokemons] = useState([]); // State to store the filtered list of Pokémons
   const [nextPage, setNextPage] = useState('');
   const [prevPage, setPrevPage] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // État pour stocker le terme de recherche
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pokedexPokemons, setPokedexPokemons] = useState([]);
+
+  useEffect(() => {
+    fetchData('https://pokeapi.co/api/v2/pokemon');
+    const savedPokemons = JSON.parse(localStorage.getItem('pokemons')) || [];
+    setPokedexPokemons(savedPokemons);
+  }, []);
 
   const fetchData = async (url) => {
     const response = await axios.get(url);
     const results = response.data.results;
 
-    // Récupérer les détails de chaque Pokémon
-    const detailedPokemons = await Promise.all(results.map(async (pokemon) => {
-      const detailedResponse = await axios.get(pokemon.url);
-      return detailedResponse.data;
-    }));
+    const promises = results.map((pokemon) => axios.get(pokemon.url));
 
-    setPokemons(detailedPokemons);
+    const detailedResponses = await Promise.all(promises);
+
+    const detailedPokemons = detailedResponses.map((response) => response.data);
+
+    setOriginalPokemons((prevOriginalPokemons) => [...prevOriginalPokemons, ...detailedPokemons]); // Update originalPokemons with combined list
+
+    setPokemons((prevPokemons) => [...prevPokemons, ...detailedPokemons]); // Update pokemons with combined list
+
     setNextPage(response.data.next);
     setPrevPage(response.data.previous);
   };
 
-  useEffect(() => {
-    fetchData('https://pokeapi.co/api/v2/pokemon');
-  }, []);
-
   const handleSearch = (event) => {
-    setSearchTerm(event.target.value); // Mettre à jour le terme de recherche à chaque changement dans la barre de recherche
+    const searchTerm = event.target.value.toLowerCase();
+
+    const filteredPokemons = originalPokemons.filter((pokemon) =>
+      pokemon.name.toLowerCase().includes(searchTerm)
+    );
+
+    setPokemons(filteredPokemons); // Update the filtered list of Pokémons
+    setSearchTerm(event.target.value); // Update the search term
   };
 
   const addPokemonToPokedex = (pokemon) => {
     const savedPokemons = JSON.parse(localStorage.getItem('pokemons')) || [];
-    const updatedPokemons = [...savedPokemons, pokemon];
-    localStorage.setItem('pokemons', JSON.stringify(updatedPokemons));
-  };
+    const maxLocalStorageSize = 5 * 1024 * 1024; // Taille maximale du stockage local en octets (5 Mo)
 
-  const filteredPokemons = pokemons.filter((pokemon) =>
-    pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ); // Filtrer les Pokémon en fonction du terme de recherche
+    const pokemonSize = JSON.stringify(pokemon).length;
+
+    let currentLocalStorageSize = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      currentLocalStorageSize += key.length + localStorage.getItem(key).length;
+    }
+
+    if (currentLocalStorageSize + pokemonSize > maxLocalStorageSize) {
+      alert('Le stockage local est plein. Veuillez supprimer des Pokémon avant d\'en ajouter de nouveaux.');
+    } else if (pokedexPokemons.find((p) => p.id === pokemon.id)) {
+      alert(`Le Pokémon ${pokemon.name} existe déjà dans votre Pokédex.`);
+    } else {
+      const updatedPokemons = [...savedPokemons, pokemon];
+      localStorage.setItem('pokemons', JSON.stringify(updatedPokemons));
+      setPokedexPokemons(updatedPokemons);
+    }
+  };
 
   return (
     <div>
-      <Header /> {/* Utilisation du composant Header */}
+      <Header />
       <h1>Liste des Pokémons</h1>
-      <div className="search-container"> {/* Conteneur pour la barre de recherche */}
+      <div className="search-container">
         <input
           type="text"
           placeholder="Rechercher un Pokémon"
           value={searchTerm}
           onChange={handleSearch}
-          className="search-input" // Ajouter la classe pour les styles personnalisés
+          className="search-input"
         />
       </div>
-      <div className="pokemon-list-container"> {/* Utilisation d'une classe CSS pour le conteneur de liste */}
-        {filteredPokemons.map((pokemon, index) => (
-          <div key={index} className="pokemon-card"> {/* Utilisation d'une classe CSS pour chaque carte de Pokémon */}
-            <img src={pokemon.sprites.front_default} alt={pokemon.name} className="pokemon-image" /> {/* Utilisation d'une classe CSS pour l'image */}
-            <div className="pokemon-details"> {/* Utilisation d'une classe CSS pour les détails du Pokémon */}
+      <div className="pokemon-list-container">
+        {pokemons.map((pokemon, index) => (
+          <div key={index} className="pokemon-card">
+            <img src={pokemon.sprites.front_default} alt={pokemon.name} className="pokemon-image" />
+            <div className="pokemon-details">
               <p><strong>Nom:</strong> {pokemon.name}</p>
               <p><strong>Numéro:</strong> {pokemon.id}</p>
               <p><strong>Types:</strong> {pokemon.types.map(type => type.type.name).join(', ')}</p>
-              <button onClick={() => addPokemonToPokedex(pokemon)}>Ajouter au Pokédex</button> 
-              <button><a href={`/pokemon/${pokemon.name}`}>Voir le détail</a></button>
+              <button className="add-button" onClick={() => addPokemonToPokedex(pokemon)}>Ajouter au Pokédex</button>
+              <a href={`/pokemon/${pokemon.name}`}><button className="detail-button">Voir le détail</button></a>
             </div>
           </div>
         ))}
       </div>
       <div className="button-container">
-        {prevPage && <button className="button" onClick={() => fetchData(prevPage)}>Page précédente</button>}
-        {nextPage && <button className="button" onClick={() => fetchData(nextPage)}>Page suivante</button>}
+        {prevPage && <button className="button" onClick={() => fetchData(prevPage)}>Précédent</button>}
+        {nextPage && <button className="button" onClick={() => fetchData(nextPage)}>Suivante</button>}
       </div>
     </div>
   );

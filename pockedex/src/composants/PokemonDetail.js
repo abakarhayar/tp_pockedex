@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import Header from './Header'; // Importer le composant Header
-import './PokemonDetail.css'; // Importer le fichier CSS pour les styles personnalisés
+import { useParams, useLocation } from 'react-router-dom';
+import Header from './Header';
+import './css/PokemonDetail.css';
 
 const PokemonDetail = () => {
   const { pokemonName } = useParams();
   const [pokemon, setPokemon] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,26 +24,50 @@ const PokemonDetail = () => {
     localStorage.setItem('pokemons', JSON.stringify(updatedPokemons));
   };
 
+  const isFromPokedex = location.pathname.includes('/pokedex');
+
   return (
     <div>
-      <Header /> {/* Ajouter le composant Header */}
+      <Header />
       <div className="pokemon-detail">
-        <h1>Détails du Pokémon {pokemonName}</h1>
         {pokemon && (
-          <div>
-            <p>Nom: {pokemon.name}</p>
-            <p>Numéro: {pokemon.id}</p>
-            <p>Types:</p>
-            <ul>
-              {pokemon.types.map((type, index) => (
-                <li key={index}>{type.type.name}</li>
-              ))}
-            </ul>
-            <img src={pokemon.sprites.front_default} alt={pokemon.name} />
+          <div className="pokemon-card">
+            <div className="pokemon-image-container">
+              <img src={pokemon.sprites.front_default} alt={pokemon.name} className="pokemon-image" />
+            </div>
+            <h1 className="pokemon-name">{pokemon.name}</h1>
+            <div className="pokemon-info">
+              <div className="pokemon-details">
+                <p><strong>Numéro:</strong> {pokemon.id}</p>
+                <p><strong>Types:</strong></p>
+                <ul>
+                  {pokemon.types.map((type, index) => (
+                    <li key={index}>{type.type.name}</li>
+                  ))}
+                </ul>
+                <p><strong>Statistiques:</strong></p>
+                <ul>
+                  {pokemon.stats.map((stat, index) => (
+                    <li key={index}>{stat.stat.name}: {stat.base_stat}</li>
+                  ))}
+                </ul>
+                <p><strong>Capacités:</strong></p>
+                <ul>
+                  {pokemon.abilities.map((ability, index) => (
+                    <li key={index}>{ability.ability.name}</li>
+                  ))}
+                </ul>
+                <p><strong>Taille:</strong> {pokemon.height}</p>
+                <p><strong>Poids:</strong> {pokemon.weight}</p>
+                <p><strong>Expérience de base:</strong> {pokemon.base_experience}</p>
+              </div>
+            </div>
+            {!isFromPokedex && (
+              <button onClick={() => addPokemonToPokedex(pokemon)}>Ajouter au Pokédex</button>
+            )}
           </div>
         )}
       </div>
-      <button onClick={() => addPokemonToPokedex(pokemon)}>Ajouter au Pokédex</button> 
     </div>
   );
 };

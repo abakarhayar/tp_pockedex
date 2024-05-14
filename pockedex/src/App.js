@@ -15,6 +15,9 @@ const App = () => {
           <Route path="/pokemon/:pokemonName">
             <PokemonDetail />
           </Route>
+          <Route path="/pokedex/:pokemonName">
+            <PokemonDetail />
+          </Route>
           <Route path="/pokedex">
             <MonPokedex />
           </Route>
