@@ -1,0 +1,25 @@
+.header {
+    background-color: #333; /* Couleur de fond de l'en-tête */
+    color: #fff; /* Couleur du texte de l'en-tête */
+    padding: 20px; /* Espacement à l'intérieur de l'en-tête */
+  }
+  
+  .nav-links {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .nav-links a {
+    color: #fff; /* Couleur du texte des liens */
+    text-decoration: none; /* Supprimer la décoration des liens */
+    margin-right: 20px; /* Espacement entre les liens */
+  }
+  
+  .nav-links a:hover {
+    text-decoration: underline; /* Souligner les liens au survol */
+  }
+  
+  h1 {
+    margin-top: 0; /* Supprimer la marge supérieure par défaut du titre */
+  }
+  
