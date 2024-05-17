@@ -57,7 +57,7 @@ const MonPokedex = () => {
               <p><strong>Nom:</strong> {pokemon.name}</p>
               <p><strong>Numéro:</strong> {pokemon.id}</p>
               <p><strong>Types:</strong> {pokemon.types.map(type => type.type.name).join(', ')}</p>
-              <a href={`/pokedex/${pokemon.name}`}><button className="detail-button">Voir le détail</button></a>
+              
               <button className="remove-button" onClick={() => handleRemovePokemon(pokemon.name)}>Supprimer</button>
             </div>
           </div>

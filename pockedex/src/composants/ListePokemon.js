@@ -4,12 +4,13 @@ import Header from './Header';
 import './css/ListePokemon.css';
 
 const ListePokemon = () => {
-  const [originalPokemons, setOriginalPokemons] = useState([]); // State to store the original list of Pokémons
-  const [pokemons, setPokemons] = useState([]); // State to store the filtered list of Pokémons
+  const [originalPokemons, setOriginalPokemons] = useState([]);
+  const [pokemons, setPokemons] = useState([]);
   const [nextPage, setNextPage] = useState('');
   const [prevPage, setPrevPage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [pokedexPokemons, setPokedexPokemons] = useState([]);
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
 
   useEffect(() => {
     fetchData('https://pokeapi.co/api/v2/pokemon');
@@ -22,37 +23,31 @@ const ListePokemon = () => {
     const results = response.data.results;
 
     const promises = results.map((pokemon) => axios.get(pokemon.url));
-
     const detailedResponses = await Promise.all(promises);
-
     const detailedPokemons = detailedResponses.map((response) => response.data);
 
-    setOriginalPokemons((prevOriginalPokemons) => [...prevOriginalPokemons, ...detailedPokemons]); // Update originalPokemons with combined list
-
-    setPokemons((prevPokemons) => [...prevPokemons, ...detailedPokemons]); // Update pokemons with combined list
-
+    setOriginalPokemons(detailedPokemons);
+    setPokemons(detailedPokemons);
     setNextPage(response.data.next);
     setPrevPage(response.data.previous);
   };
 
   const handleSearch = (event) => {
     const searchTerm = event.target.value.toLowerCase();
-
     const filteredPokemons = originalPokemons.filter((pokemon) =>
       pokemon.name.toLowerCase().includes(searchTerm)
     );
-
-    setPokemons(filteredPokemons); // Update the filtered list of Pokémons
-    setSearchTerm(event.target.value); // Update the search term
+    setPokemons(filteredPokemons);
+    setSearchTerm(event.target.value);
   };
 
   const addPokemonToPokedex = (pokemon) => {
     const savedPokemons = JSON.parse(localStorage.getItem('pokemons')) || [];
-    const maxLocalStorageSize = 5 * 1024 * 1024; // Taille maximale du stockage local en octets (5 Mo)
+    const maxLocalStorageSize = 5 * 1024 * 1024;
 
     const pokemonSize = JSON.stringify(pokemon).length;
-
     let currentLocalStorageSize = 0;
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       currentLocalStorageSize += key.length + localStorage.getItem(key).length;
@@ -67,6 +62,14 @@ const ListePokemon = () => {
       localStorage.setItem('pokemons', JSON.stringify(updatedPokemons));
       setPokedexPokemons(updatedPokemons);
     }
+  };
+
+  const openModal = (pokemon) => {
+    setSelectedPokemon(pokemon);
+  };
+
+  const closeModal = () => {
+    setSelectedPokemon(null);
   };
 
   return (
@@ -91,15 +94,31 @@ const ListePokemon = () => {
               <p><strong>Numéro:</strong> {pokemon.id}</p>
               <p><strong>Types:</strong> {pokemon.types.map(type => type.type.name).join(', ')}</p>
               <button className="add-button" onClick={() => addPokemonToPokedex(pokemon)}>Ajouter au Pokédex</button>
-              <a href={`/pokemon/${pokemon.name}`}><button className="detail-button">Voir le détail</button></a>
+              <button className="detail-button" onClick={() => openModal(pokemon)}>Voir le détail</button>
             </div>
           </div>
         ))}
       </div>
       <div className="button-container">
-        {prevPage && <button className="button" onClick={() => fetchData(prevPage)}>Précédent</button>}
-        {nextPage && <button className="button" onClick={() => fetchData(nextPage)}>Suivante</button>}
+        {prevPage && <button className="button" onClick={() => fetchData(prevPage)}>Page précédente</button>}
+        {nextPage && <button className="button" onClick={() => fetchData(nextPage)}>Page suivante</button>}
       </div>
+      {selectedPokemon && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={closeModal}>&times;</span>
+            <h2 style={{ color: '#ff4500' }}>Détail du Pokémon</h2>
+            <p><strong>Nom:</strong> {selectedPokemon.name}</p>
+            <p><strong>Numéro:</strong> {selectedPokemon.id}</p>
+            <p><strong>Types:</strong> {selectedPokemon.types.map(type => type.type.name).join(', ')}</p>
+            <p><strong>Poids:</strong> {selectedPokemon.weight}</p>
+            <p><strong>Taille:</strong> {selectedPokemon.height}</p>
+            <p><strong>Poids:</strong> {selectedPokemon.weight}</p>
+            <p><strong>Expérience de base:</strong> {selectedPokemon.base_experience}</p>
+            <img src={selectedPokemon.sprites.front_default} alt={selectedPokemon.name} className="pokemon-image" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

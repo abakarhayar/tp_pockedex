@@ -95,3 +95,49 @@ h1{
   border-radius: 5px;
   border: 1px solid #ccc;
 }
+/* CSS */
+.modal {
+  display: ${selectedPokemon ? 'block' : 'none'}; /* Afficher uniquement lorsque selectedPokemon est défini */
+  position: fixed; /* Positionnement absolu par rapport à la fenêtre du navigateur */
+  top: 50%; /* Centrer verticalement */
+  left: 50%; /* Centrer horizontalement */
+  transform: translate(-50%, -50%); /* Centrer parfaitement */
+  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  z-index: 999; /* Assurez-vous que le modal est au-dessus de tout le reste */
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: #fff; /* Couleur du texte */
+  background-color: #333; /* Couleur de fond */
+  width: 30px; /* Largeur du bouton */
+  height: 30px; /* Hauteur du bouton */
+  border-radius: 50%; /* Bordure arrondie pour créer un bouton circulaire */
+  display: flex; /* Pour centrer le contenu verticalement */
+  justify-content: center; /* Pour centrer le contenu horizontalement */
+  align-items: center; /* Pour centrer le contenu verticalement */
+}
+
+.close:hover {
+  background-color: #555; /* Couleur de fond au survol */
+}
+
+
+.modal-content {
+  background-color: white;
+  padding: 40px; /* Augmentez la valeur de padding pour augmenter la taille de la modal */
+  border-radius: 10px; /* Augmentez la valeur de border-radius pour arrondir les coins */
+  width: 150%; /* Définissez la largeur de la modal */
+  max-width: 600px; /* Définissez une largeur maximale pour la modal */
+  margin: 0 auto; /* Centrez la modal horizontalement */
+}
+
