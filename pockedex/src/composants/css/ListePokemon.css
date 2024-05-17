@@ -136,7 +136,7 @@ h1{
   background-color: white;
   padding: 40px; /* Augmentez la valeur de padding pour augmenter la taille de la modal */
   border-radius: 10px; /* Augmentez la valeur de border-radius pour arrondir les coins */
-  width: 150%; /* Définissez la largeur de la modal */
+  width: 100%; /* Définissez la largeur de la modal */
   max-width: 600px; /* Définissez une largeur maximale pour la modal */
   margin: 0 auto; /* Centrez la modal horizontalement */
 }
